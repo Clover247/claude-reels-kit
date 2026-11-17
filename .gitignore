@@ -1,0 +1,20 @@
+# client work never goes into git
+projects/*
+!projects/.gitkeep
+samples/
+deliveries/
+brands/*
+!brands/_example/
+toolkit/reel/src/projects/*
+!toolkit/reel/src/projects/.gitkeep
+toolkit/reel/src/anim/series_*.tsx
+# secrets (API keys live here or in env vars)
+.secrets/
+*.key
+.env
+# build stuff
+node_modules/
+__pycache__/
+*.pyc
+toolkit/fonts/_ui_bold.ttf
+.claude/settings.local.json

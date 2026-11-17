@@ -1,0 +1,15 @@
+{
+  "name": "Example Brand",
+  "instagram": "@example",
+  "colors": {
+    "dark": "#1F3D7A",
+    "mid": "#3D6BB3",
+    "accent": "#8FCBF5",
+    "pale": "#E7F1FB",
+    "light": "#FFFFFF"
+  },
+  "fonts": {
+    "sans": {"family": "Montserrat", "file": "Montserrat.ttf", "weight": "100 900"},
+    "script": {"family": "MarckScript", "file": "MarckScript.ttf"}
+  }
+}

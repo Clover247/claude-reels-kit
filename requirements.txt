@@ -1,0 +1,11 @@
+# python toolkit/py/doctor.py checks all of this
+numpy
+scipy
+soundfile
+pillow
+matplotlib
+faster-whisper>=1.1
+# optional
+librosa            # music_probe.py (tempo / brightness of candidate tracks)
+# NVIDIA GPU only (Windows/Linux), makes whisper ~10x faster:
+#   pip install nvidia-cublas-cu12 nvidia-cudnn-cu12

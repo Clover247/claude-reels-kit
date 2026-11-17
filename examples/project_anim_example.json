@@ -1,0 +1,22 @@
+{
+  "id": "brand-s1e1-topic",
+  "type": "anim",
+  "title": "Series name · episode 1 — topic",
+  "client": "example",
+  "brand": "brands/_example/brand.json",
+  "samples": ".",
+  "clip_prefix": "",
+  "fps": 30,
+  "language": "uk",
+  "max_seconds": 60,
+  "music": "toolkit/music/Be Chillin.mp3",
+  "voice": {
+    "provider": "elevenlabs",
+    "voice_id": "<from: python toolkit/py/tts.py projects/<id> --voices — the owner picks by ear>",
+    "model_id": "eleven_multilingual_v2",
+    "stability": 0.45,
+    "similarity_boost": 0.8,
+    "style": 0.25,
+    "speed": 1.0
+  }
+}
