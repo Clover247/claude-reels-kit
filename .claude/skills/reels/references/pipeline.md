@@ -63,6 +63,17 @@ texts[] {kind, frm, dur, ...}; transitions[] {at, kind}; sfx[] {kind, at}; capti
 `cut_audit.py <p> [tag]` table + spectrogram sheet; `verify_words.py <p>` re-transcription diff; `review.py <p> <video> <out.jpg> [frames]`;
 `music_probe.py [dir]` tempo/brightness/steadiness of candidate tracks; `click_probe.py <wav> t…` rustle feature at given times.
 
+## Speech-to-text / text-to-speech — pluggable
+- STT for `ingest.py` / `verify_words.py`: `--stt whisper|deepgram` or project.json `"stt"`; default auto = whisper
+  on an NVIDIA GPU, Deepgram when there is no GPU but a key, else whisper on CPU. Both write the same transcript format
+  (`transcripts/<stem>.json`: segments → words {w, s, e, p}); `"keyterms": [...]` in project.json boosts brand words
+  on Deepgram nova-3 (whisper uses `whisper_prompt`). `stt.py` = the Deepgram client (key: env DEEPGRAM_API_KEY or
+  `.secrets/deepgram.key`).
+- Any other service (AssemblyAI, OpenAI, Google, Azure, local models…) = add a function to `stt.py` returning that same
+  segment format and a branch in `stt.engine` — the rest of the pipeline doesn't care. Same for TTS: `tts.py` writes
+  `tts/<line>.mp3` + `.json` {chars, starts, ends}; another provider only has to produce that.
+- Cut points never come from any ASR (they come from `vad.py`), so switching STT doesn't change where the edit cuts.
+
 ## Animated projects — no footage (project.json `"type": "anim"`)
 For faceless 2D explainers (e.g. a winter how-to series for an HVAC company).
 ```

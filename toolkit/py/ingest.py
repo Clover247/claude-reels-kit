@@ -4,9 +4,9 @@ For each clip in project.json "samples":
   proxy/<stem>.mp4      540x960 h264 (fast to scrub, small for contact sheets)
   audio/<stem>.wav      16 kHz mono (whisper input)
   sheets/<stem>.jpg     contact sheet, <=24 frames with burned-in timecode  -> LOOK at these (Read tool)
-  transcripts/<stem>.json  faster-whisper large-v3 word timestamps (GPU)
+  transcripts/<stem>.json  word timestamps: faster-whisper large-v3 (local, GPU/CPU) or Deepgram nova-3 (cloud) — see stt.engine
 Then prints an overview table (clip, length, words, first words) to plan blocks from.
-Idempotent: existing outputs are skipped. Usage: python ingest.py <project_dir> [--no-whisper] [--cpu]
+Idempotent: existing outputs are skipped. Usage: python ingest.py <project_dir> [--no-whisper] [--cpu] [--stt whisper|deepgram]
 """
 import json, os, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
@@ -49,7 +49,21 @@ for c, f in clips.items():
     print(f"ok {stem}")
 json.dump(meta, open(P.path("clips.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
-if "--no-whisper" not in sys.argv:
+import stt
+ENGINE = stt.engine(P.cfg, sys.argv)
+if "--no-whisper" not in sys.argv and ENGINE == "deepgram":
+    for c in clips:
+        stem = P.prefix + c
+        out, au = P.transcript(c), P.path("audio", f"{stem}.wav")
+        if os.path.exists(out) or not os.path.exists(au):
+            continue
+        t0 = time.time()
+        data = stt.segments(au, P.cfg.get("language", "uk"), P.cfg.get("keyterms", []))
+        os.makedirs(os.path.dirname(out), exist_ok=True)
+        json.dump({"file": stem, "duration": meta[c]["dur"], "engine": "deepgram", "segments": data},
+                  open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print(f"deepgram {stem}: {len(data)} segments in {time.time() - t0:.0f}s")
+elif "--no-whisper" not in sys.argv:
     import soundfile as sf
     model = None
     for c in clips:

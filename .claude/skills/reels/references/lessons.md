@@ -23,6 +23,9 @@
   confirm any suspect with an isolated snippet before changing the edit.
 - faster-whisper + PyAV 19: pass numpy audio (soundfile), not a path. Windows CUDA DLLs: `common.setup_cuda_dlls()`.
 - `initial_prompt` with brand names/terms improves recognition; still keep a FIX dict for brand spellings (IDEXX, SDMA, T4).
+- Deepgram nova-3 word starts are closer to the truth than whisper's ("Отже,": real onset 1.08 s, Deepgram 0.96,
+  whisper 0.72) and it is ~3 s per clip in the cloud; but on a whole edited reel it mishears more (292/305 words vs
+  whisper 306/305) → for verify_words a missing word is a suspect only, confirm with an isolated snippet either way.
 
 ## Audio
 - Fixed VAD threshold failed: street/clinic noise sits ~30 dB under speech and is non-stationary. Use per-clip

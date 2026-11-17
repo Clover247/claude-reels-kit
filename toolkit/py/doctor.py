@@ -47,6 +47,9 @@ line((ROOT / "toolkit/reel/node_modules/remotion").exists(), "Remotion installed
      "cd toolkit/reel && npm ci")
 line(any((ROOT / ".claude/skills").glob("remotion-*")), "(optional) official Remotion agent skills in .claude/skills",
      "from the repo root: npx skills add remotion-dev/skills  (they must end up in .claude/skills/remotion-*)")
+line((ROOT / ".secrets/deepgram.key").exists() or bool(__import__("os").environ.get("DEEPGRAM_API_KEY")),
+     "(optional) Deepgram key — cloud speech-to-text (recommended without an NVIDIA GPU)",
+     "sign up at deepgram.com (free credit), put the key into .secrets/deepgram.key (never into chat or code)")
 line((ROOT / ".secrets/elevenlabs.key").exists() or bool(__import__("os").environ.get("ELEVENLABS_API_KEY")),
      "(optional) ElevenLabs key — only for animated reels with AI voice-over",
      "put the key into .secrets/elevenlabs.key (never into chat or code)")

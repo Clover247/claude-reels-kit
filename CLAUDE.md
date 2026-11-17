@@ -41,6 +41,14 @@ python toolkit/py/render.py   projects/<id> [--preview|--studio]   # deliverable
 # animated, no footage ("type": "anim"): tts.py → anim_build.py → music.py → render.py   (reels/references/pipeline.md)
 ```
 
+## Services are pluggable — you wire them up
+- Speech-to-text: local **faster-whisper** (free, needs nothing but time; fast on an NVIDIA GPU) or **Deepgram** nova-3
+  (cloud, ~3 s per clip, very good Ukrainian; new accounts get free starting credit — enough for hundreds of hours,
+  check deepgram.com/pricing). `ingest.py --stt deepgram`, or automatic when there is no GPU but a key.
+- Text-to-speech for animated reels: ElevenLabs (`tts.py`). Any other STT/TTS the user already pays for → adapt
+  `stt.py` / `tts.py` to it (same output format; see references/pipeline.md "pluggable"). Ask the user for the key
+  and have them put it into `.secrets/<service>.key` or an env var themselves.
+
 ## Non-negotiable rules (each one came from a real mistake)
 - Never cut on whisper word times: starts are 0.3–0.5 s early, ends are early. Boundaries come from the spectral VAD
   in `build.py`/`vad.py`; keep ~0.28 s of natural decay after a phrase.

@@ -14,9 +14,13 @@ Target: Windows 10/11, macOS or Linux. Disk: ~2 GB for tools + space for footage
    Then `cd toolkit/reel && npm ci` (Remotion + React, exact versions from package-lock.json).
 5. **Remotion agent skills (recommended):** from the repo root `npx skills add remotion-dev/skills`; they must end up
    in `.claude/skills/remotion-*`. They are API reference — the `reels` skill owns the workflow.
-6. **Optional, animated reels only:** ElevenLabs API key → ask the user to paste it into the file `.secrets/elevenlabs.key`
+6. **Optional, speech-to-text in the cloud (recommended without an NVIDIA GPU):** Deepgram — the user signs up at
+   deepgram.com (free starting credit), creates an API key and pastes it into `.secrets/deepgram.key` themselves.
+   Then transcription runs in the cloud automatically (or force it: `ingest.py <p> --stt deepgram`). Any other STT/TTS
+   service works too — adapt `toolkit/py/stt.py` / `tts.py` (see the "pluggable" section in references/pipeline.md).
+7. **Optional, animated reels only:** ElevenLabs API key → ask the user to paste it into the file `.secrets/elevenlabs.key`
    themselves (not into the chat). Without it anim_build makes a silent draft with estimated timing.
-7. Run `doctor.py` again → `READY`. Smoke test: put 2–3 short phone videos in a folder, then
+8. Run `doctor.py` again → `READY`. Smoke test: put 2–3 short phone videos in a folder, then
    `python toolkit/py/new_project.py test-reel "<folder>" --brand test --max 30` and follow the `reels` skill.
 
 **Remotion licence:** free for individuals and companies with up to 3 people (commercial use included); bigger teams

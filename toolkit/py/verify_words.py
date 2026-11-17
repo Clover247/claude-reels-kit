@@ -33,10 +33,16 @@ for m in tl["main"]:
 tmp = f"{W}/clean/master16k.wav"
 subprocess.run([FF, "-v", "error", "-y", "-i", f"{W}/clean/master_raw.wav", "-ac", "1", "-ar", "16000", tmp], check=True)
 audio, _ = sf.read(tmp, dtype="float32")
-model = whisper_model()
-segs, _ = model.transcribe(audio, language=P.cfg.get("language", "uk"), word_timestamps=True, vad_filter=False, condition_on_previous_text=False,
-                           initial_prompt=P.cfg.get("whisper_prompt"))
-got = [dict(w=norm(w.word), raw=w.word.strip(), t=w.start) for s in segs for w in (s.words or [])]
+import stt
+if stt.engine(P.cfg, sys.argv) == "deepgram":
+    got = [dict(w=norm(w["word"]), raw=w["word"], t=w["start"])
+           for w in stt.transcribe(tmp, P.cfg.get("language", "uk"), P.cfg.get("keyterms", []))["words"]]
+else:
+    model = whisper_model()
+    segs, _ = model.transcribe(audio, language=P.cfg.get("language", "uk"), word_timestamps=True, vad_filter=False,
+                               condition_on_previous_text=False, initial_prompt=P.cfg.get("whisper_prompt"))
+    got = [dict(w=norm(w.word), raw=w.word.strip(), t=w.start) for s in segs for w in (s.words or [])]
+print(f"heard via {'deepgram' if 'model' not in dir() else 'whisper'}")
 
 sm = difflib.SequenceMatcher(a=[e["w"] for e in exp], b=[g["w"] for g in got], autojunk=False)
 issues = 0

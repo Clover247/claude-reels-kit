@@ -1,4 +1,5 @@
-"""Speech-to-text via Deepgram — used instead of local whisper for checks of TTS / edits.
+"""Speech-to-text via Deepgram (cloud, nova-3) — alternative to local whisper: ingest.py / verify_words.py use it with
+`--stt deepgram` or project.json "stt": "deepgram" (auto when there is no NVIDIA GPU but a key exists); also for TTS checks.
   python stt.py <audio> [<audio> ...]          prints transcript, words/s, duration per file
   from stt import transcribe; words = transcribe(path)   -> [{word, start, end, confidence}] + text
 Key: env DEEPGRAM_API_KEY or <repo>/.secrets/deepgram.key. Model nova-3 (falls back to nova-2 if a language is refused).
@@ -47,6 +48,38 @@ def transcribe(path, language="uk", keyterms=()):
 
 
 import urllib.parse  # noqa: E402
+
+
+def segments(path, language="uk", keyterms=(), gap=0.8):
+    """Deepgram words -> the transcript format ingest.py writes for whisper:
+    [{start, end, text, words: [{w, s, e, p}]}]; a segment ends at . ! ? or a pause > gap s."""
+    ws = transcribe(path, language, keyterms)["words"]
+    segs, cur = [], []
+    for i, w in enumerate(ws):
+        cur.append(dict(w=w["word"], s=round(w["start"], 2), e=round(w["end"], 2), p=round(w["confidence"], 2)))
+        nxt = ws[i + 1]["start"] if i + 1 < len(ws) else None
+        if w["word"].endswith((".", "!", "?", "…")) or nxt is None or nxt - w["end"] > gap:
+            segs.append(dict(start=cur[0]["s"], end=cur[-1]["e"], text=" ".join(x["w"] for x in cur), words=cur))
+            cur = []
+    return segs
+
+
+def has_key():
+    return bool(os.environ.get("DEEPGRAM_API_KEY", "").strip()) or (ROOT / ".secrets" / "deepgram.key").exists()
+
+
+def engine(cfg, argv):
+    """Which STT to use: --stt whisper|deepgram, else project.json "stt", else auto
+    (whisper on an NVIDIA GPU; no GPU + a Deepgram key -> deepgram; else whisper on CPU)."""
+    for i, a in enumerate(argv):
+        if a == "--stt" and i + 1 < len(argv):
+            return argv[i + 1]
+        if a.startswith("--stt="):
+            return a.split("=", 1)[1]
+    if cfg.get("stt") in ("whisper", "deepgram"):
+        return cfg["stt"]
+    from common import has_cuda
+    return "whisper" if has_cuda() or not has_key() else "deepgram"
 
 if __name__ == "__main__":
     for p in sys.argv[1:]:
